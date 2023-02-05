@@ -1,0 +1,1 @@
+print(stderr.read().decode('utf-8'))
