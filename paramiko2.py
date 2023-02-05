@@ -14,13 +14,13 @@ ssh.connect(
     password="27102022"
 )
 
-# Run the 'docker exec' command inside the container
-stdin, stdout, stderr = ssh.exec_command(
-    "docker exec lightningsliver ls"
-)
+# Run the "ls" command inside the Docker container
+stdin, stdout, stderr = ssh.exec_command("docker exec lightningsliver ls")
+print(stdout.read().decode())
 
-# Print the output of the 'ls' command
-print(stdout.read().decode("utf-8"))
+# Change to the "folder1" directory inside the Docker container and run "ls" again
+stdin, stdout, stderr = ssh.exec_command("docker exec lightningsliver sh -c 'cd home/4nm19is120/text_to_image/Text-to-Image-Using-GAN-master/text_to_image/Text-to-Image-Using-GAN-master && ls'")
+print(stdout.read().decode())
 
 # Close the SSH connection
 ssh.close()
