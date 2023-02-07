@@ -1,13 +1,18 @@
 import os
 from tkinter import *
 from tkinter import messagebox
+from PIL import Image, ImageTk
 root = Tk()
 
 #Below line will open application in full screen mode
-#root.attributes('-fullscreen', True)
+# root.attributes('-fullscreen', True)
+root.state("zoomed")
 #currently using custom screen size
-root.geometry("1400x900")
-root.title(" Text to Image Synthesis using Generative Adversarial Networks.")
+# screen_width = root.winfo_screenwidth()
+# screen_height = root.winfo_screenheight()
+# root.geometry(f"{screen_width}x{screen_height}")
+
+root.title(" Text to Image Synthesis using Generative Adversarial Networks")
 
 def open_text():
         if (os.path.exists(r".\Data") != True):
@@ -68,30 +73,38 @@ def generate():
 
         # import shutil
         # shutil.unpack_archive('./download.zip')
+        ################################################
 
         # messagebox.showinfo('Success!', 'Your images have been successfully generated!\n\nCLICK \'OK\' TO SEE YOUR IMAGE.')
 
 def display():
-        Output.config(state=NORMAL)
-        Output.image_create(END, image=img)
-        Output.config(state=DISABLED)
+        frame = Frame(root)
+        frame.pack()
+        frame.place(anchor='center', relx=0.5, rely=0.6)
+        toDisplay = ImageTk.PhotoImage(Image.open("0.jpg"))
+        label  = Label(frame, image = toDisplay)
+        label.image = toDisplay
+        label.pack()
 
 
 L = Label(text = "\n\nEnter the description of the image to be generated: ")
-Input = Text(root, height = 10, width = 150, bg = "light yellow")
-Output = Text(root, height = 20, width = 150, state=DISABLED)
-Open = Button(root, height = 2, width = 20, text ="Create / Open Text File", command = lambda:open_text())
-Save = Button(root, height = 2, width = 20, text="Save File", command = lambda:save_text())
-Generate = Button(root, height = 2, width = 20, text ="Generate Image", command = lambda:generate())
-img = PhotoImage(file="sheep.gif")
-Display = Button(root, height = 2, width = 20, text ="Display Image", command = lambda:display())
-
 L.pack()
-Input.pack()
-Open.pack()
-Save.pack()
-Generate.pack()
-Display.pack()
-Output.pack()
 
-mainloop()
+Input = Text(root, height = 10, width = 150, bg = "light yellow")
+Input.pack()
+
+# Output = Text(root, height = 10, width = 20, state=DISABLED)
+Open = Button(root, height = 2, width = 20, text ="Create / Open Text File", command = lambda:open_text())
+Open.pack()
+
+Save = Button(root, height = 2, width = 20, text="Save File", command = lambda:save_text())
+Save.pack()
+
+Generate = Button(root, height = 2, width = 20, text ="Generate Image", command = lambda:generate())
+Generate.pack()
+
+Display = Button(root, height = 2, width = 20, text ="Display Image", command = lambda:display())
+Display.pack()
+
+
+root.mainloop()

@@ -1,18 +1,15 @@
-from tkinter import *
+import tkinter as tk
+from tkinter import PhotoImage
 
-def display_image():
-    text_widget.config(state=NORMAL)
-    text_widget.image_create(END, image=img)
-    text_widget.config(state=DISABLED)
+def show_image():
+    image = PhotoImage(file="spider.png")
+    label = tk.Label(root, image=image)
+    label.image = image  # Keep a reference to the image to avoid garbage collection
+    label.pack()
 
-root = Tk()
+root = tk.Tk()
 
-text_widget = Text(root, height=20, width=150, state=DISABLED)
-text_widget.pack()
-
-img = PhotoImage(file="sheep.gif")
-
-display_button = Button(root, text="Display Image", command=display_image)
-display_button.pack()
+button = tk.Button(root, text="Show Image", command=show_image)
+button.pack()
 
 root.mainloop()
