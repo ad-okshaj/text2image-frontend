@@ -32,4 +32,7 @@ sftp.close()
 # Close the SSH connection
 ssh.close()
 
+# Extracts zip file.
+import shutil
+shutil.unpack_archive('./download.zip')
 
