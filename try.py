@@ -1,15 +1,15 @@
 import tkinter as tk
-from tkinter import PhotoImage
 
-def show_image():
-    image = PhotoImage(file="spider.png")
-    label = tk.Label(root, image=image)
-    label.image = image  # Keep a reference to the image to avoid garbage collection
-    label.pack()
+def save_text():
+    entered_text = entry.get()
+    print(entered_text)
 
 root = tk.Tk()
 
-button = tk.Button(root, text="Show Image", command=show_image)
-button.pack()
+entry = tk.Entry(root)
+entry.pack()
+
+save_button = tk.Button(root, text="Save Entered Text", command=save_text)
+save_button.pack()
 
 root.mainloop()
