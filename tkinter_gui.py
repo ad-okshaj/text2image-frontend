@@ -81,7 +81,7 @@ def generate():
         if entered_text == "":
                 messagebox.showwarning("Warning", "Enter some text first.")
         else:
-                print(entered_text)
+                # print(entered_text)
                 messagebox.showinfo('WAITING.....', 'Read the following instructions carefully:\n\nThe image generation process will begin once you press the \'OK\' button.\n\nPlease wait patiently for 5 - 10 minutes.\n\nA new dialog box will appear on your screen as soon as the image generation process finishes.\n\nCLICK \'OK\' TO START THE PROCESS.')
                 ################################################
                 import paramiko
@@ -108,7 +108,7 @@ def display():
         else:
                 import shutil
                 shutil.unpack_archive('./download.zip')
-                print(entered_text)
+                # print(entered_text)
                 frame = Frame(root)
                 frame.pack()
                 frame.place(anchor='center', relx=0.5, rely=0.6)
