@@ -1,4 +1,6 @@
 import os
+import paramiko
+import shutil
 from tkinter import *
 from tkinter import messagebox
 from PIL import Image, ImageTk
@@ -12,45 +14,16 @@ root = Tk()
 # screen_height = root.winfo_screenheight()
 # root.geometry(f"{screen_width}x{screen_height}")
 
-root.title(" Text to Image Synthesis using Generative Adversarial Networks")
+root.title("Text to Image Synthesis using Generative Adversarial Networks")
 
-def open_text():
-        pass
-        #################################
-        #  if (os.path.exists(r".\\text.txt") != True):
-        #         import paramiko
-        #         ssh = paramiko.SSHClient()
-        #         ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        #         ssh.connect(
-        #         hostname="gpu.nmamit.in",
-        #         port=202,
-        #         username="4nm19is120",
-        #         password="27102022"
-        #         )
-        #         sftp = ssh.open_sftp()
-        #         sftp.get('/home/4nm19is120/text_to_image/Text-to-Image-Using-GAN-master/Data/text.txt', 'text.txt')
-        #         sftp.close()
-        #         ssh.close()
-        #         text_file = open("text.txt", "r")
-        #         content = text_file.read()
-        #         Input.insert(END, content)
-        #         text_file.close()
-        # elif (os.path.exists(r".\\text.txt") == True):
-        #         text_file = open("text.txt", "r")
-        #         content = text_file.read()
-        #         Input.insert(END, content)
-        #         text_file.close()
-        # else:
-        #         print('Something\'s wrong. I can feel it.')
-        #################################
-
-
+def warning():
+        messagebox.showwarning("Warning", "Enter and Save some text first.")
 
 def save_text():
         global entered_text
         entered_text = entry1.get()
         if entered_text == "":
-                messagebox.showwarning("Warning", "Enter some text first.")
+                warning()
         else:
                 print(entered_text)
                 entered_text=entered_text.replace(" ","_")
@@ -58,11 +31,22 @@ def save_text():
                 messagebox.showinfo("File Saved","Your text has been saved. \nPlease CLEAR CACHE before starting the image generation process.")
 
 def clear_cache():
-        if entered_text == "":
-                messagebox.showwarning("Warning", "Enter some text first.")
-        else:
-                print(entered_text)
-                import paramiko
+        try:
+                print('inside first try block')
+                if entered_text == "":
+                        warning()
+                        return
+        except NameError:
+                print('inside NameError Block')
+                warning()
+                return
+        # except paramiko.ssh_exception.SSHException as e:
+        #         if 'time' in str(e):
+        #                 print('hello there')
+        #                 print(e)
+        #                 print('hello there')
+        try:
+                print('inside 2nd try block')
                 ssh = paramiko.SSHClient()
                 ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
                 ssh.connect(
@@ -74,17 +58,41 @@ def clear_cache():
                 stdin, stdout, stderr = ssh.exec_command("docker exec lightningsliver sh -c 'cd home/4nm19is120/text_to_image/Text-to-Image-Using-GAN-master/text_to_image/Text-to-Image-Using-GAN-master/Data/ && ls && rm download.zip && rm -rf images_generated_from_text && rm enc_text.pkl && ls'")
                 print(stdout.read().decode())
                 ssh.close()
+        except TimeoutError:
+                print('inside TimeoutError block')
+                messagebox.showinfo('Server Issue!', 'Cannot connect to Server.')
+                return
+        else:
+                print('inside else block')
                 messagebox.showinfo('Success!', 'Server Cache been successfully cleared!\n\nCLICK \'Generate Image Now\'.')
+                # ssh = paramiko.SSHClient()
+                # ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+                # ssh.connect(
+                #         hostname="gpu.nmamit.in",
+                #         port=202,
+                #         username="4nm19is120",
+                #         password="27102022"
+                #         )
+                # stdin, stdout, stderr = ssh.exec_command("docker exec lightningsliver sh -c 'cd home/4nm19is120/text_to_image/Text-to-Image-Using-GAN-master/text_to_image/Text-to-Image-Using-GAN-master/Data/ && ls && rm download.zip && rm -rf images_generated_from_text && rm enc_text.pkl && ls'")
+                # print(stdout.read().decode())
+                # ssh.close()
+                # messagebox.showinfo('Success!', 'Server Cache been successfully cleared!\n\nCLICK \'Generate Image Now\'.')
+                
 
 
 def generate():
-        if entered_text == "":
-                messagebox.showwarning("Warning", "Enter some text first.")
-        else:
+        try:
+                if entered_text == "":
+                        warning()
+                        return
+        except NameError:
+                warning()
+                return
+        try:
                 # print(entered_text)
                 messagebox.showinfo('WAITING.....', 'Read the following instructions carefully:\n\nThe image generation process will begin once you press the \'OK\' button.\n\nPlease wait patiently for 5 - 10 minutes.\n\nA new dialog box will appear on your screen as soon as the image generation process finishes.\n\nCLICK \'OK\' TO START THE PROCESS.')
                 ################################################
-                import paramiko
+                #import paramiko
                 ssh = paramiko.SSHClient()
                 ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
                 ssh.connect(
@@ -101,12 +109,19 @@ def generate():
                 ssh.close()
                 ################################################
                 messagebox.showinfo('Success!', 'Your images have been successfully generated!\n\nCLICK \'Display Image Button\' TO SEE YOUR IMAGE.')
+        except TimeoutError:
+                print('inside TimeoutError block')
+                messagebox.showinfo('Server Issue!', 'Cannot connect to Server.')
+                return
 
 def display():
-        if entered_text == "":
-                messagebox.showwarning("Warning", "Enter some text first.")
+        try:
+                if entered_text == "":
+                        warning()
+        except NameError:
+                warning()
         else:
-                import shutil
+                #import shutil
                 shutil.unpack_archive('./download.zip')
                 # print(entered_text)
                 frame = Frame(root)
@@ -116,6 +131,15 @@ def display():
                 label  = Label(frame, image = toDisplay)
                 label.image = toDisplay
                 label.pack()
+
+def upscale():
+        try:
+                if entered_text == "":
+                        warning()
+        except NameError:
+                warning()
+        else:
+                pass
 
 
 L = Label(text = "\n\nEnter the description of the image to be generated: \n")
@@ -146,5 +170,7 @@ Generate = Button(root, height = 2, width = 20, text ="Generate Image", command 
 Generate.pack()
 Display = Button(root, height = 2, width = 20, text ="Display Image", command = lambda:display())
 Display.pack()
+Upscale = Button(root, height = 2, width = 20, text ="Upscale / Downscale Image", command = lambda:upscale())
+Upscale.pack()
 
 root.mainloop()
