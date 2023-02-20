@@ -1,6 +1,8 @@
 import os
 import paramiko
+import requests
 import shutil
+from replicate import Client
 from tkinter import *
 from tkinter import messagebox
 from PIL import Image, ImageTk
@@ -10,9 +12,9 @@ root = Tk()
 # root.attributes('-fullscreen', True)
 # root.state("zoomed")
 #currently using custom screen size
-# screen_width = root.winfo_screenwidth()
-# screen_height = root.winfo_screenheight()
-# root.geometry(f"{screen_width}x{screen_height}")
+screen_width = root.winfo_screenwidth()
+screen_height = root.winfo_screenheight()
+root.geometry(f"{screen_width}x{screen_height}")
 
 root.title("Text to Image Synthesis using Generative Adversarial Networks")
 
@@ -32,21 +34,16 @@ def save_text():
 
 def clear_cache():
         try:
-                print('inside first try block')
+                #print('inside first try block')
                 if entered_text == "":
                         warning()
                         return
         except NameError:
-                print('inside NameError Block')
+                #print('inside NameError Block')
                 warning()
                 return
-        # except paramiko.ssh_exception.SSHException as e:
-        #         if 'time' in str(e):
-        #                 print('hello there')
-        #                 print(e)
-        #                 print('hello there')
         try:
-                print('inside 2nd try block')
+                #print('inside 2nd try block')
                 ssh = paramiko.SSHClient()
                 ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
                 ssh.connect(
@@ -59,26 +56,12 @@ def clear_cache():
                 print(stdout.read().decode())
                 ssh.close()
         except TimeoutError:
-                print('inside TimeoutError block')
+                #print('inside TimeoutError block')
                 messagebox.showinfo('Server Issue!', 'Cannot connect to Server.')
                 return
         else:
-                print('inside else block')
+                #print('inside else block')
                 messagebox.showinfo('Success!', 'Server Cache been successfully cleared!\n\nCLICK \'Generate Image Now\'.')
-                # ssh = paramiko.SSHClient()
-                # ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-                # ssh.connect(
-                #         hostname="gpu.nmamit.in",
-                #         port=202,
-                #         username="4nm19is120",
-                #         password="27102022"
-                #         )
-                # stdin, stdout, stderr = ssh.exec_command("docker exec lightningsliver sh -c 'cd home/4nm19is120/text_to_image/Text-to-Image-Using-GAN-master/text_to_image/Text-to-Image-Using-GAN-master/Data/ && ls && rm download.zip && rm -rf images_generated_from_text && rm enc_text.pkl && ls'")
-                # print(stdout.read().decode())
-                # ssh.close()
-                # messagebox.showinfo('Success!', 'Server Cache been successfully cleared!\n\nCLICK \'Generate Image Now\'.')
-                
-
 
 def generate():
         try:
@@ -92,7 +75,6 @@ def generate():
                 # print(entered_text)
                 messagebox.showinfo('WAITING.....', 'Read the following instructions carefully:\n\nThe image generation process will begin once you press the \'OK\' button.\n\nPlease wait patiently for 5 - 10 minutes.\n\nA new dialog box will appear on your screen as soon as the image generation process finishes.\n\nCLICK \'OK\' TO START THE PROCESS.')
                 ################################################
-                #import paramiko
                 ssh = paramiko.SSHClient()
                 ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
                 ssh.connect(
@@ -113,24 +95,33 @@ def generate():
                 print('inside TimeoutError block')
                 messagebox.showinfo('Server Issue!', 'Cannot connect to Server.')
                 return
-
+counter = 0
+#red flower
 def display():
+        global counter
+        if counter == 29:
+                counter = 0
         try:
                 if entered_text == "":
                         warning()
         except NameError:
                 warning()
-        else:
+                return
+        try:
                 #import shutil
                 shutil.unpack_archive('./download.zip')
                 # print(entered_text)
                 frame = Frame(root)
                 frame.pack()
                 frame.place(anchor='center', relx=0.5, rely=0.6)
-                toDisplay = ImageTk.PhotoImage(Image.open(".\images_generated_from_text\\0\\0.jpg"))
+                toDisplay = ImageTk.PhotoImage(Image.open(f".\images_generated_from_text\\0\\{counter}.jpg"))
+                counter += 1
                 label  = Label(frame, image = toDisplay)
                 label.image = toDisplay
                 label.pack()
+        except shutil.ReadError:
+                messagebox.showinfo('Zip File or Image Not Found!', 'Please Generate Image before using Display Image function.')
+                return
 
 def upscale():
         try:
@@ -138,10 +129,35 @@ def upscale():
                         warning()
         except NameError:
                 warning()
-        else:
-                pass
+                return
+        try:
+                api_token = '9f1515e50373ad39d9512502109fbc3333be2644'
+                replicate = Client(api_token=api_token)
+                model = replicate.models.get("nightmareai/real-esrgan")
+                version = model.versions.get("42fed1c4974146d4d2414e2be2c5277c7fcf05fcc3a73abf41610695738c1d7b")
+                inputs = {
+                'image': open(f'images_generated_from_text/0/{counter}.jpg', 'rb'),
+                'scale': 5,
+                'face_enhance': False,
+                }
+                output = version.predict(**inputs)
+                # print(output)
+                response = requests.get(output)
+                if response.status_code == 200:
+                        with open(f"{counter}_upscaled.jpg", "wb") as f:
+                                f.write(response.content)
+                else:
+                        print("Failed to download image, status code:", response.status_code)
+                        messagebox.showinfo('Server Issue!', 'Cannot connect to Server.')
+                        return
+        except FileNotFoundError:
+                messagebox.showinfo('Zip File or Image Not Found!', 'Please Generate Image before using Upscale / Downscale Image function.')                
+                return
 
+def display_upscale():
+        pass
 
+        
 L = Label(text = "\n\nEnter the description of the image to be generated: \n")
 L.pack()
 # Input = Text(root, height = 10, width = 150, bg = "light yellow")
@@ -149,18 +165,14 @@ L.pack()
 # Open = Button(root, height = 2, width = 20, text ="Open Text File", command = lambda:open_text())
 # Open.pack()
 
-###############################################
 # This is used to take input from user
 # and show it in Entry Widget.
 # Whatever data that we get from keyboard
 # will be treated as string.
 input_text = StringVar()
 entry1 = Entry(root, textvariable = input_text, justify = CENTER)
-# focus_force is used to take focus
-# as soon as application starts
 entry1.focus_force()
-entry1.pack(side = TOP, ipadx = 30, ipady = 6)
-###############################################
+entry1.pack(side = TOP, ipadx = 30, ipady = 6, pady=20)
 
 Save = Button(root, height = 2, width = 20, text="Save Text", command = lambda:save_text())
 Save.pack()
@@ -168,9 +180,11 @@ Clear = Button(root, height = 2, width = 20, text="Clear Cache", command = lambd
 Clear.pack()
 Generate = Button(root, height = 2, width = 20, text ="Generate Image", command = lambda:generate())
 Generate.pack()
-Display = Button(root, height = 2, width = 20, text ="Display Image", command = lambda:display())
+Display = Button(root, height = 2, width = 20, text ="Display / Change Image", command = lambda:display())
 Display.pack()
 Upscale = Button(root, height = 2, width = 20, text ="Upscale / Downscale Image", command = lambda:upscale())
+Upscale.pack()
+Upscale = Button(root, height = 2, width = 20, text ="Display Upscaled Image", command = lambda:display_upscale())
 Upscale.pack()
 
 root.mainloop()
