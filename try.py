@@ -1,15 +1,27 @@
 import tkinter as tk
 
-def save_text():
-    entered_text = entry.get()
-    print(entered_text)
+# Create the tkinter window
+window = tk.Tk()
 
-root = tk.Tk()
+# Load the two images
+image1 = tk.PhotoImage(file="5_upscaled.jpg")
+image2 = tk.PhotoImage(file="9_upscaled.jpg")
 
-entry = tk.Entry(root)
-entry.pack()
+# Create frames for the images
+frame1 = tk.Frame(window)
+frame2 = tk.Frame(window)
 
-save_button = tk.Button(root, text="Save Entered Text", command=save_text)
-save_button.pack()
+# Create labels to display the images in the frames
+label1 = tk.Label(frame1, image=image1)
+label2 = tk.Label(frame2, image=image2)
 
-root.mainloop()
+# Pack the labels inside the frames
+label1.pack()
+label2.pack()
+
+# Pack the frames side by side
+frame1.pack(side="left")
+frame2.pack(side="left")
+
+# Start the tkinter event loop
+window.mainloop()

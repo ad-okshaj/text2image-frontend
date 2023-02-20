@@ -8,6 +8,8 @@ from tkinter import messagebox
 from PIL import Image, ImageTk
 root = Tk()
 
+counter = 0
+
 #Below line will open application in full screen mode
 # root.attributes('-fullscreen', True)
 # root.state("zoomed")
@@ -95,7 +97,7 @@ def generate():
                 print('inside TimeoutError block')
                 messagebox.showinfo('Server Issue!', 'Cannot connect to Server.')
                 return
-counter = 0
+
 #red flower
 def display():
         global counter
@@ -111,14 +113,14 @@ def display():
                 #import shutil
                 shutil.unpack_archive('./download.zip')
                 # print(entered_text)
-                frame = Frame(root)
-                frame.pack()
-                frame.place(anchor='center', relx=0.5, rely=0.6)
+                # frame = Frame(root)
+                # frame.pack()
+                # frame.place(anchor='center', relx=0.5, rely=0.6)
                 toDisplay = ImageTk.PhotoImage(Image.open(f".\images_generated_from_text\\0\\{counter}.jpg"))
                 counter += 1
                 label  = Label(frame, image = toDisplay)
                 label.image = toDisplay
-                label.pack()
+                label.pack(side="left")
         except shutil.ReadError:
                 messagebox.showinfo('Zip File or Image Not Found!', 'Please Generate Image before using Display Image function.')
                 return
@@ -146,6 +148,8 @@ def upscale():
                 if response.status_code == 200:
                         with open(f"{counter}_upscaled.jpg", "wb") as f:
                                 f.write(response.content)
+                        messagebox.showinfo('Success', 'Success')                
+                        return
                 else:
                         print("Failed to download image, status code:", response.status_code)
                         messagebox.showinfo('Server Issue!', 'Cannot connect to Server.')
@@ -155,20 +159,30 @@ def upscale():
                 return
 
 def display_upscale():
-        pass
+        try:
+                if entered_text == "":
+                        warning()
+        except NameError:
+                warning()
+                return
+        try:
+                # frame = Frame(root)
+                # frame.pack()
+                # frame.place(anchor='center', relx=0.5, rely=0.6)
+                upscaled_image = Image.open(f".\{counter}_upscaled.jpg")
+                resized = upscaled_image.resize((300, 300))
+                toDisplay = ImageTk.PhotoImage(resized)
+                label  = Label(frame, image = toDisplay)
+                label.image = toDisplay
+                label.pack(side="right")
+        except shutil.ReadError:
+                messagebox.showinfo('Error', 'Error')
+                return
 
-        
+
 L = Label(text = "\n\nEnter the description of the image to be generated: \n")
 L.pack()
-# Input = Text(root, height = 10, width = 150, bg = "light yellow")
-# Input.pack()
-# Open = Button(root, height = 2, width = 20, text ="Open Text File", command = lambda:open_text())
-# Open.pack()
 
-# This is used to take input from user
-# and show it in Entry Widget.
-# Whatever data that we get from keyboard
-# will be treated as string.
 input_text = StringVar()
 entry1 = Entry(root, textvariable = input_text, justify = CENTER)
 entry1.focus_force()
@@ -186,5 +200,15 @@ Upscale = Button(root, height = 2, width = 20, text ="Upscale / Downscale Image"
 Upscale.pack()
 Upscale = Button(root, height = 2, width = 20, text ="Display Upscaled Image", command = lambda:display_upscale())
 Upscale.pack()
+
+
+frame = Frame(root, bg="white", bd=2, highlightbackground="black", highlightthickness=2, padx=10, pady=10)
+frame.pack(pady=20)
+
+label = Label(frame, text="This is a label")
+button = Button(frame, text="Click me")
+
+# label.pack(side="left")
+# button.pack(side="right")
 
 root.mainloop()
