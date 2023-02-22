@@ -14,7 +14,7 @@ counter = 0
 #currently using custom screen size
 screen_width = root.winfo_screenwidth()
 screen_height = root.winfo_screenheight()
-root.geometry(f"{int(screen_width/2)-200}x{screen_height-200}")
+root.geometry(f"{int(screen_width/2)-200}x{screen_height-165}")
 root.resizable(False, False)
 
 root.title("Text to Image Synthesis using Generative Adversarial Networks")
@@ -54,11 +54,9 @@ def clear_cache():
                 print(stdout.read().decode())
                 ssh.close()
         except TimeoutError:
-                #print('inside TimeoutError block')
                 messagebox.showinfo('Server Issue!', 'Cannot connect to Server.')
                 return
         else:
-                #print('inside else block')
                 messagebox.showinfo('Success!', 'Server Cache been successfully cleared!\n\nCLICK \'Generate Image Now\'.')
 
 def generate():
@@ -87,7 +85,6 @@ def generate():
                 ssh.close()
                 messagebox.showinfo('Success!', 'Your images have been successfully generated!\n\nCLICK \'Display Image Button\' TO SEE YOUR IMAGE.')
         except TimeoutError:
-                print('inside TimeoutError block')
                 messagebox.showinfo('Server Issue!', 'Cannot connect to Server.')
                 return
 
@@ -101,15 +98,12 @@ def display():
         except NameError:
                 warning()
                 return
-        
-        if os.path.exists("./images_generated_from_text"):
-                pass
-        else:
-                shutil.unpack_archive('./download.zip')
-
+        if os.path.exists('./images_generated_from_text'):
+                shutil.rmtree("./images_generated_from_text")
+        shutil.unpack_archive('./download.zip')
         frame = Frame(root, bg="white", bd=2, highlightbackground="black", highlightthickness=2, padx=10, pady=10)
         frame.pack(pady=20)
-        # frame.place(anchor='center', relx=0.5, rely=0.6)
+        frame.place(x=50, y=347)
 
         toDisplay = ImageTk.PhotoImage(Image.open(f".\images_generated_from_text\\0\\{counter}.jpg"))
         label  = Label(frame, image = toDisplay)
@@ -152,5 +146,9 @@ Generate = Button(root, height = 2, width = 20, text ="Generate Image", bd=1, re
 Generate.pack(pady=5)
 Display = Button(root, height = 2, width = 20, text="Upscale + Display + \nChange Image", bd=1, relief="solid", highlightthickness=1, highlightbackground="black", command = lambda:display())
 Display.pack(pady=5)
+
+X = Label(text = "Image will be shown here", font=("", 10))
+X.pack()
+X.place(x=209, y=440)
 
 root.mainloop()
