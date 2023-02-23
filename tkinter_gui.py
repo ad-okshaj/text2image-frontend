@@ -6,6 +6,8 @@ from replicate import Client
 from tkinter import *
 from tkinter import messagebox
 from PIL import Image, ImageTk
+
+
 root = Tk()
 counter = -1
 entered_text = ""
@@ -15,10 +17,11 @@ entered_text = ""
 #currently using custom screen size
 screen_width = root.winfo_screenwidth()
 screen_height = root.winfo_screenheight()
-root.geometry(f"{int(screen_width/2)-200}x{screen_height-165}")
+root.geometry(f"{int(screen_width/2)-200}x{screen_height-220}")
 root.resizable(False, False)
 root.title("Text to Image Synthesis using Generative Adversarial Networks")
 
+    
 def warning():
         messagebox.showwarning("Warning!", "Enter Some Text First.")
 
@@ -99,7 +102,7 @@ def upscaleimg():
         response = requests.get(output)
         with open(f"{counter}_upscaled.jpg", "wb") as f:
                 f.write(response.content)
-
+        
 def previous_image():
         global counter
         if counter <= 0:
@@ -109,7 +112,7 @@ def previous_image():
                 counter -= 1
                 frame = Frame(root, bg="white", bd=2, highlightbackground="black", highlightthickness=2, padx=10, pady=10)
                 frame.pack(pady=20)
-                frame.place(x=50, y=347)
+                frame.place(x=50, y=280)
 
                 original_image = ImageTk.PhotoImage(Image.open(f".\images_generated_from_text\\0\\{counter}.jpg"))
                 label  = Label(frame, image = original_image)
@@ -141,7 +144,7 @@ def next_image():
                 counter += 1
                 frame = Frame(root, bg="white", bd=2, highlightbackground="black", highlightthickness=2, padx=10, pady=10)
                 frame.pack(pady=20)
-                frame.place(x=50, y=347)
+                frame.place(x=50, y=280)
 
                 original_image = ImageTk.PhotoImage(Image.open(f".\images_generated_from_text\\0\\{counter}.jpg"))
                 label  = Label(frame, image = original_image)
@@ -194,6 +197,6 @@ buttonFrame.pack()
 
 X = Label(text = "Image will be shown here", font=("", 10))
 X.pack()
-X.place(x=209, y=440)
+X.place(x=209, y=400)
 
 root.mainloop()
