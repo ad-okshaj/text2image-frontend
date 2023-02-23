@@ -8,6 +8,7 @@ from tkinter import messagebox
 from PIL import Image, ImageTk
 root = Tk()
 counter = -1
+entered_text = ""
 #Below line will open application in full screen mode
 # root.attributes('-fullscreen', True)
 # root.state("zoomed")
@@ -16,35 +17,26 @@ screen_width = root.winfo_screenwidth()
 screen_height = root.winfo_screenheight()
 root.geometry(f"{int(screen_width/2)-200}x{screen_height-165}")
 root.resizable(False, False)
-
 root.title("Text to Image Synthesis using Generative Adversarial Networks")
 
-frame = Frame(root, bg="white", bd=2, highlightbackground="black", highlightthickness=2, padx=10, pady=10)
-frame.pack(pady=20)
-frame.place(x=50, y=347)
-
 def warning():
-        messagebox.showwarning("Warning", "Enter some text first.")
+        messagebox.showwarning("Warning!", "Enter Some Text First.")
 
 def save_text():
         global entered_text
-        entered_text = entry1.get()
-        if entered_text == "":
-                warning()
-        else:
-                print(entered_text)
-                entered_text=entered_text.replace(" ","_")
-                print(entered_text)
-                messagebox.showinfo('WAITING.....', 'Read the following instructions carefully:\n\nThe image generation process will begin once you press the \'OK\' button.\n\nPlease wait patiently for 5 - 10 minutes.\n\nA new dialog box will appear on your screen as soon as the image generation process finishes.\n\nCLICK \'OK\' TO START THE PROCESS.')
+        print(entered_text)
+        entered_text=entered_text.replace(" ","_")
+        print(entered_text)
+        messagebox.showinfo('WAITING.....', 'READ ME:\n\nThe image generation process will begin once you press the \'OK\' button.\n\nPlease wait patiently for 5 - 10 minutes.\n\nA new dialog box will appear on your screen as soon as the image generation process finishes.\n\nCLICK \'OK\' TO START THE PROCESS.')
 
 def clear_cache():
-        try:
-                if entered_text == "":
-                        #warning()
-                        return
-        except NameError:
-                warning()
-                return
+        # try:
+        #         if entered_text == "":
+        #                 #warning()
+        #                 return
+        # except NameError:
+        #         warning()
+        #         return
         try:
                 ssh = paramiko.SSHClient()
                 ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
@@ -65,13 +57,15 @@ def clear_cache():
                 pass
 
 def generate():
-        try:
-                if entered_text == "":
-                        return
-        except NameError:
-                warning()
-                return
-        try:
+        global entered_text
+        # try:
+        #         if entered_text == "":
+        #                 return
+        # except NameError:
+        #         warning()
+        #         return
+        try:    
+                counter = -1
                 ssh = paramiko.SSHClient()
                 ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
                 ssh.connect(
@@ -88,30 +82,9 @@ def generate():
                 ssh.close()
                 messagebox.showinfo('Success!', 'Your images have been successfully generated!\n\nCLICK \'Display Image Button\' TO SEE YOUR IMAGE.')
         except TimeoutError:
-                messagebox.showinfo('Server Issue!', 'Cannot connect to Server.')
+                messagebox.showinfo('Server Issue!', 'Cannot Connect to Server.\n\nServer may be down. Please try again in some time.')
                 return
 
-
-
-def previous_image():
-        global counter
-        if counter == 0:
-                print("NO MORE PREVIOUS")
-                return
-        print('inside previous func.')
-        counter -= 1
-        toDisplay = ImageTk.PhotoImage(Image.open(f".\images_generated_from_text\\0\\{counter}.jpg"))
-        label  = Label(frame, image = toDisplay)
-        label.image = toDisplay
-        label.pack(side="left")
-        upscaled_image = Image.open(f".\{counter}_upscaled.jpg")
-        resized = upscaled_image.resize((300, 300))
-        toDisplay = ImageTk.PhotoImage(resized)
-        label  = Label(frame, image = toDisplay)
-        label.image = toDisplay
-        label.pack(side="right")
-        
-        
 def upscaleimg():
         api_token = '9f1515e50373ad39d9512502109fbc3333be2644'
         replicate = Client(api_token=api_token)
@@ -127,33 +100,74 @@ def upscaleimg():
         with open(f"{counter}_upscaled.jpg", "wb") as f:
                 f.write(response.content)
 
-def next_image():
+def previous_image():
         global counter
-        counter += 1
-        if os.path.exists('./images_generated_from_text'):
-                shutil.rmtree("./images_generated_from_text")
-        shutil.unpack_archive('./download.zip')
-        frame = Frame(root, bg="white", bd=2, highlightbackground="black", highlightthickness=2, padx=10, pady=10)
-        frame.pack(pady=20)
-        frame.place(x=50, y=347)
+        if counter <= 0:
+                messagebox.showinfo('Empty!', 'Beginning of directory reached. \n\nNo more Previous images.\n\nPlease Generate new set of images.')                
+                return
+        else:
+                counter -= 1
+                frame = Frame(root, bg="white", bd=2, highlightbackground="black", highlightthickness=2, padx=10, pady=10)
+                frame.pack(pady=20)
+                frame.place(x=50, y=347)
 
-        toDisplay = ImageTk.PhotoImage(Image.open(f".\images_generated_from_text\\0\\{counter}.jpg"))
-        label  = Label(frame, image = toDisplay)
-        label.pack(side="left")
-        label.config(image=toDisplay)
-        label.image = toDisplay
+                original_image = ImageTk.PhotoImage(Image.open(f".\images_generated_from_text\\0\\{counter}.jpg"))
+                label  = Label(frame, image = original_image)
+                label.pack(side="left")
+                label.config(image=original_image)
+                label.image = original_image
+                
+                upscaled_image = Image.open(f".\{counter}_upscaled.jpg")
+                resized = upscaled_image.resize((300, 300))
+                upscaled_image = ImageTk.PhotoImage(resized)
+                label  = Label(frame, image = upscaled_image)
+                label.pack(side="right")
+                label.config(image=upscaled_image)
+                label.image = upscaled_image
         
-        upscaleimg()
-        
-        upscaled_image = Image.open(f".\{counter}_upscaled.jpg")
-        resized = upscaled_image.resize((300, 300))
-        toDisplay = ImageTk.PhotoImage(resized)
-        label  = Label(frame, image = toDisplay)
-        label.pack(side="right")
-        label.config(image=toDisplay)
-        label.image = toDisplay
+def next_image():             
+        global counter
+        if counter >= 29:
+                messagebox.showinfo('Empty!', 'End of directory reached. \n\nNo more Next images.\n\nPlease Generate new set of images.')                
+                return
+        else:
+                try:
+                        if os.path.exists('./images_generated_from_text'):
+                                shutil.rmtree("./images_generated_from_text")
+                        shutil.unpack_archive('./download.zip')
+                except shutil.ReadError:
+                        messagebox.showinfo('Empty!', 'End of directory reached. \n\nNo more Next images.\n\nPlease Generate new set of images.')                
+                        return
+                counter += 1
+                frame = Frame(root, bg="white", bd=2, highlightbackground="black", highlightthickness=2, padx=10, pady=10)
+                frame.pack(pady=20)
+                frame.place(x=50, y=347)
+
+                original_image = ImageTk.PhotoImage(Image.open(f".\images_generated_from_text\\0\\{counter}.jpg"))
+                label  = Label(frame, image = original_image)
+                label.pack(side="left")
+                label.config(image=original_image)
+                label.image = original_image
+                
+                if os.path.exists(f'./{counter}_upscaled.jpg'):
+                        pass
+                else:
+                        upscaleimg()
+                
+                upscaled_image = Image.open(f".\{counter}_upscaled.jpg")
+                resized = upscaled_image.resize((300, 300))
+                upscaled_image = ImageTk.PhotoImage(resized)
+                label  = Label(frame, image = upscaled_image)
+                label.pack(side="right")
+                label.config(image=upscaled_image)
+                label.image = upscaled_image
 
 def fire_all():
+        global entered_text
+        entered_text = entry1.get()
+        if entered_text == "":
+                warning()
+                return
         save_text()
         clear_cache()
         generate()
@@ -165,19 +179,8 @@ entry1 = Entry(root, textvariable = input_text, width=30, bd=1, relief="solid", 
 entry1.focus_force()
 entry1.pack(side = TOP, ipadx = 40, ipady = 6, pady=15)
 
-# Save = Button(root, height = 2, width = 20, text="Save Text", bd=1, relief="solid", highlightthickness=1, highlightbackground="black", command = lambda:save_text())
-# Save.pack(pady=5)
-# Clear = Button(root, height = 2, width = 20, text="Clear Cache", bd=1, relief="solid", highlightthickness=1, highlightbackground="black", command = lambda:clear_cache())
-# Clear.pack(pady=5)
-# Generate = Button(root, height = 2, width = 20, text ="Generate Image", bd=1, relief="solid", highlightthickness=1, highlightbackground="black", command = lambda:generate())
-# Generate.pack(pady=5)
-
-
 Generate = Button(root, height = 2, width = 20, text="Generate Image", bd=1, relief="solid", highlightthickness=1, highlightbackground="black", command = lambda:fire_all())
 Generate.pack(pady=5)
-
-# Display = Button(root, height = 2, width = 20, text="Upscale + Display + \nChange Image", bd=1, relief="solid", highlightthickness=1, highlightbackground="black", command = lambda:display())
-# Display.pack(pady=5)
 
 buttonFrame = Frame(root)
 
@@ -188,8 +191,6 @@ next = Button(buttonFrame, text="Next Image", height = 2, width = 20, bd=1, reli
 next.pack(side=LEFT, padx=4, pady=5)
 
 buttonFrame.pack()
-
-
 
 X = Label(text = "Image will be shown here", font=("", 10))
 X.pack()
