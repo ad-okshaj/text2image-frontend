@@ -17,7 +17,7 @@ screen_height = root.winfo_screenheight()
 root.geometry(f"{int(screen_width/2)-200}x{screen_height-165}")
 root.resizable(False, False)
 
-root.title("Text to Photo-Realistic Image Synthesis using Generative Adversarial Networks")
+root.title("Text to Image Synthesis using Generative Adversarial Networks")
 
 frame = Frame(root, bg="white", bd=2, highlightbackground="black", highlightthickness=2, padx=10, pady=10)
 frame.pack(pady=20)
@@ -54,7 +54,7 @@ def clear_cache():
                         username="4nm19is120",
                         password="27102022"
                         )
-                stdin, stdout, stderr = ssh.exec_command("docker exec lightningsliver sh -c 'cd home/4nm19is120/text_to_image/Text-to-Image-Using-GAN-master/text_to_image/Text-to-Image-Using-GAN-master/Data/ && ls && rm download.zip && rm -rf images_generated_from_text && rm enc_text.pkl && ls'")
+                stdin, stdout, stderr = ssh.exec_command("docker exec pratheek sh -c 'cd home/4nm19is120/text_to_image/text_to_image/Text-to-Image-Using-GAN-master/Data/ && ls && rm download.zip && rm -rf images_generated_from_text && rm enc_text.pkl && ls'")
                 print(stdout.read().decode())
                 ssh.close()
         except TimeoutError:
@@ -80,36 +80,17 @@ def generate():
                 username="4nm19is120",
                 password="27102022"
                 )
-                stdin, stdout, stderr = ssh.exec_command(f"docker exec lightningsliver sh -c 'cd home/4nm19is120/text_to_image/Text-to-Image-Using-GAN-master/text_to_image/Text-to-Image-Using-GAN-master/ && python3 connection.py --data_set=flowers --t_dim=100 --image_size=128 --data_set=flowers --z_dim=100 --n_classes=1 --caption_vector_length=4800 --batch_size=128  --checkpoints_dir=Data/training/TAC_TEST400AUG/checkpoints --images_per_caption=30 --data_dir=Data --text={entered_text} && cd Data && zip -r download.zip images_generated_from_text/* && ls'")
+                stdin, stdout, stderr = ssh.exec_command(f"docker exec pratheek sh -c 'cd home/4nm19is120/text_to_image/text_to_image/Text-to-Image-Using-GAN-master/ && python3 connection.py --data_set=flowers --t_dim=100 --image_size=128 --data_set=flowers --z_dim=100 --n_classes=24 --caption_vector_length=4800 --batch_size=128  --checkpoints_dir=Data/training/TAC_128/checkpoints --images_per_caption=30 --data_dir=Data --text={entered_text} && cd Data && zip -r download.zip images_generated_from_text/* && ls'")
                 print(stdout.read().decode())
                 sftp = ssh.open_sftp()
                 sftp.get('/home/4nm19is120/text_to_image/Text-to-Image-Using-GAN-master/Data/download.zip', 'download.zip')
                 sftp.close()
                 ssh.close()
                 messagebox.showinfo('Success!', 'Your images have been successfully generated!\n\nCLICK \'Display Image Button\' TO SEE YOUR IMAGE.')
-        except TimeoutError: 
+        except TimeoutError:
                 messagebox.showinfo('Server Issue!', 'Cannot connect to Server.')
                 return
 
-
-
-# def previous_image():
-#         global counter
-#         if counter == 0:
-#                 print("NO MORE PREVIOUS")
-#                 return
-#         print('inside previous func.')
-#         counter -= 1
-#         toDisplay = ImageTk.PhotoImage(Image.open(f".\images_generated_from_text\\0\\{counter}.jpg"))
-#         label  = Label(frame, image = toDisplay)
-#         label.image = toDisplay
-#         label.pack(side="left")
-#         upscaled_image = Image.open(f".\{counter}_upscaled.jpg")
-#         resized = upscaled_image.resize((300, 300))
-#         toDisplay = ImageTk.PhotoImage(resized)
-#         label  = Label(frame, image = toDisplay)
-#         label.image = toDisplay
-#         label.pack(side="right")
 
 
 def previous_image():
@@ -143,7 +124,7 @@ def previous_image():
         label  = Label(frame, image = toDisplay)
         label.image = toDisplay
         label.pack(side="right")
-
+        
         
 def upscaleimg():
         api_token = '9f1515e50373ad39d9512502109fbc3333be2644'
