@@ -35,7 +35,7 @@ def save_text():
                 print(entered_text)
                 entered_text=entered_text.replace(" ","_")
                 print(entered_text)
-                messagebox.showinfo('WAITING.....', 'Read the following instructions carefully:\n\nThe image generation process will begin once you press the \'OK\' button.\n\nPlease wait patiently for 5 - 10 minutes.\n\nA new dialog box will appear on your screen as soon as the image generation process finishes.\n\nCLICK \'OK\' TO START THE PROCESS.')
+                messagebox.showinfo('IMPORTANT - README', 'To start image generation press \'OK\' button.\n\nWait patiently for 5 - 10 minutes.\n\nA new dialog box MUST appear on your screen as soon as the image generation process finishes.\n\nCLICK \'OK\' TO START THE PROCESS.')
 
 def clear_cache():
         try:
@@ -86,7 +86,7 @@ def generate():
                 sftp.get('/home/4nm19is120/text_to_image/Text-to-Image-Using-GAN-master/Data/download.zip', 'download.zip')
                 sftp.close()
                 ssh.close()
-                messagebox.showinfo('Success!', 'Your images have been successfully generated!\n\nCLICK \'Display Image Button\' TO SEE YOUR IMAGE.')
+                messagebox.showinfo('Success!', 'Image Generation Complete.\n\nClick \'Next Image\' button to see your image.')
         except TimeoutError:
                 messagebox.showinfo('Server Issue!', 'Cannot connect to Server.')
                 return
@@ -102,8 +102,8 @@ def previous_image():
         #                 warning()
         # except NameError:
         #         warning()
-        if counter == 0:
-                print("NO MORE PREVIOUS")
+        if counter == 0 or counter == -1:
+                messagebox.showinfo('End of folder', 'No more previous image.')
                 return
         if os.path.exists('./images_generated_from_text'):
                 shutil.rmtree("./images_generated_from_text")
@@ -156,8 +156,11 @@ def next_image():
         label.pack(side="left")
         label.config(image=toDisplay)
         label.image = toDisplay
-        
-        upscaleimg()
+
+        imagePath = f"{counter}_upscaled.jpg"
+        if not os.path.exists(imagePath):
+                print('running upscale....')
+                upscaleimg()
         
         upscaled_image = Image.open(f".\{counter}_upscaled.jpg")
         resized = upscaled_image.resize((300, 300))
